@@ -149,24 +149,32 @@ $("importBtn").addEventListener("click",()=>$("importFile").click());
 $("importFile").addEventListener("change",e=>{if(e.target.files[0])importBackup(e.target.files[0]);});
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
 
-// Close the open mobile sidebar with a left-swipe gesture.
-(function enableSidebarSwipeClose(){
+// Bidirectional mobile gestures: swipe right from the left screen edge to open;
+// swipe left anywhere to close the open sidebar.
+(function enableSidebarSwipe(){
   const sidebar=$("sidebar");
-  let startX=0, startY=0, tracking=false;
-  sidebar.addEventListener("touchstart",event=>{
-    if(!sidebar.classList.contains("open") || !event.touches.length)return;
-    startX=event.touches[0].clientX;
-    startY=event.touches[0].clientY;
+  let startX=0, startY=0, tracking=false, startedOpen=false;
+  document.addEventListener("touchstart",event=>{
+    if(innerWidth>700 || !event.touches.length || $("modalBackdrop").hidden===false)return;
+    const touch=event.touches[0];
+    startedOpen=sidebar.classList.contains("open");
+    // When closed, only begin an opening gesture from the left edge.
+    if(!startedOpen && touch.clientX>32){tracking=false;return;}
+    startX=touch.clientX;
+    startY=touch.clientY;
     tracking=true;
   },{passive:true});
-  sidebar.addEventListener("touchend",event=>{
+  document.addEventListener("touchend",event=>{
     if(!tracking || !event.changedTouches.length)return;
     const dx=event.changedTouches[0].clientX-startX;
     const dy=event.changedTouches[0].clientY-startY;
-    if(dx< -65 && Math.abs(dx)>Math.abs(dy)*1.25) sidebar.classList.remove("open");
+    if(Math.abs(dx)>65 && Math.abs(dx)>Math.abs(dy)*1.25){
+      if(startedOpen && dx<0) sidebar.classList.remove("open");
+      else if(!startedOpen && dx>0) sidebar.classList.add("open");
+    }
     tracking=false;
   },{passive:true});
-  sidebar.addEventListener("touchcancel",()=>{tracking=false;},{passive:true});
+  document.addEventListener("touchcancel",()=>{tracking=false;},{passive:true});
 })();
 function setTheme(theme){
   document.documentElement.dataset.theme=theme;
