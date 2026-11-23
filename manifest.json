@@ -1,0 +1,11 @@
+{
+  "name": "PromptVault — AI Prompt Library",
+  "short_name": "PromptVault",
+  "description": "Your personal library for AI prompts and instructions.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#101827",
+  "icons": []
+}
