@@ -95,6 +95,7 @@ function handleForm(event){
 }
 async function copyPrompt(id){
   const p=prompts.find(item=>item.id===id); if(!p)return;
+  if(window.AndroidBridge && typeof AndroidBridge.copyText==="function"){AndroidBridge.copyText(p.content);showToast("Copied to clipboard!");return;}
   try{
     await navigator.clipboard.writeText(p.content);
     showToast("Copied to clipboard!");
@@ -112,7 +113,9 @@ function handleCardAction(event){
   if(action==="delete" && confirm(`Delete "${p.title}"? This cannot be undone.`)){prompts=prompts.filter(item=>item.id!==id);savePrompts();render();showToast("Prompt deleted.");}
 }
 function exportBackup(){
-  const blob=new Blob([JSON.stringify({app:"PromptVault",version:1,exportedAt:new Date().toISOString(),prompts},null,2)],{type:"application/json"});
+  const backup=JSON.stringify({app:"PromptVault",version:1,exportedAt:new Date().toISOString(),prompts},null,2);
+  if(window.AndroidBridge && typeof AndroidBridge.saveBackup==="function"){AndroidBridge.saveBackup(backup);return;}
+  const blob=new Blob([backup],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="promptvault-backup.json";a.click();URL.revokeObjectURL(url);showToast("Backup exported.");
 }
 function importBackup(file){
@@ -145,6 +148,15 @@ $("exportBtn").addEventListener("click",exportBackup);
 $("importBtn").addEventListener("click",()=>$("importFile").click());
 $("importFile").addEventListener("change",e=>{if(e.target.files[0])importBackup(e.target.files[0]);});
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+function setTheme(theme){
+  document.documentElement.dataset.theme=theme;
+  localStorage.setItem("promptvault.theme",theme);
+  const button=$("themeBtn");
+  if(button){button.innerHTML=theme==="dark"?"☀ <span>Light mode</span>":"☾ <span>Dark mode</span>";button.setAttribute("aria-label",theme==="dark"?"Switch to light mode":"Switch to dark mode");}
+}
+const savedTheme=localStorage.getItem("promptvault.theme");
+setTheme(savedTheme==="dark"?"dark":"light");
+$("themeBtn").addEventListener("click",()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark"));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("searchInput").focus();}});
 if("serviceWorker" in navigator && location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 render();
