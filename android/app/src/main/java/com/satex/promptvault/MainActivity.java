@@ -132,6 +132,15 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void syncPrompts(String json) {
+            if (json == null) return;
+            getSharedPreferences("promptvault_native", MODE_PRIVATE)
+                    .edit()
+                    .putString("prompts_json", json)
+                    .apply();
+        }
+
+        @JavascriptInterface
         public void saveBackup(String json) {
             pendingBackup = json;
             runOnUiThread(() -> {
