@@ -119,6 +119,10 @@ public class MainActivity extends Activity {
     private class AppBridge {
         @JavascriptInterface
         public void setTheme(String theme) {
+            getSharedPreferences("promptvault_native", MODE_PRIVATE)
+                    .edit()
+                    .putString("theme", theme)
+                    .apply();
             runOnUiThread(() -> applyNativeTheme(theme));
         }
 
