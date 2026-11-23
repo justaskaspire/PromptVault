@@ -149,7 +149,7 @@ $("importBtn").addEventListener("click",()=>$("importFile").click());
 $("importFile").addEventListener("change",e=>{if(e.target.files[0])importBackup(e.target.files[0]);});
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
 
-// Close the mobile sidebar with a right-swipe gesture, as requested.
+// Close the open mobile sidebar with a left-swipe gesture.
 (function enableSidebarSwipeClose(){
   const sidebar=$("sidebar");
   let startX=0, startY=0, tracking=false;
@@ -163,13 +163,14 @@ $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"))
     if(!tracking || !event.changedTouches.length)return;
     const dx=event.changedTouches[0].clientX-startX;
     const dy=event.changedTouches[0].clientY-startY;
-    if(dx>65 && Math.abs(dx)>Math.abs(dy)*1.25) sidebar.classList.remove("open");
+    if(dx< -65 && Math.abs(dx)>Math.abs(dy)*1.25) sidebar.classList.remove("open");
     tracking=false;
   },{passive:true});
   sidebar.addEventListener("touchcancel",()=>{tracking=false;},{passive:true});
 })();
 function setTheme(theme){
   document.documentElement.dataset.theme=theme;
+  if(window.AndroidBridge && typeof AndroidBridge.setTheme==="function") AndroidBridge.setTheme(theme);
   localStorage.setItem("promptvault.theme",theme);
   const button=$("themeBtn");
   if(button){button.innerHTML=theme==="dark"?"☀ <span>Light mode</span>":"☾ <span>Dark mode</span>";button.setAttribute("aria-label",theme==="dark"?"Switch to light mode":"Switch to dark mode");}
