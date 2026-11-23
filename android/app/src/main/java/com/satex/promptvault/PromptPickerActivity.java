@@ -8,7 +8,9 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Bundle;\nimport android.os.SystemClock;\nimport android.util.Log;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.util.Log;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -29,7 +31,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-public class PromptPickerActivity extends Activity {\n    private static final String TAG = "PromptVaultTiming";
+public class PromptPickerActivity extends Activity {
+    private static final String TAG = "PromptVaultTiming";
     private final List<PromptItem> allPrompts = new ArrayList<>();
     private LinearLayout listContainer;
     private EditText searchInput;
@@ -43,19 +46,31 @@ public class PromptPickerActivity extends Activity {\n    private static final S
 
     @Override
     protected void onCreate(Bundle state) {
+        long startedAt = SystemClock.elapsedRealtime();
+        Log.i(TAG, "PICKER_ON_CREATE_ENTER");
         super.onCreate(state);
         SharedPreferences prefs = getSharedPreferences("promptvault_native", MODE_PRIVATE);
-        dark = "dark".equals(prefs.getString("theme", "light"));\n        Log.i(TAG, "PICKER_PREFS_READ after " + (SystemClock.elapsedRealtime() - startedAt) + " ms");
+        dark = "dark".equals(prefs.getString("theme", "light"));
+        Log.i(TAG, "PICKER_PREFS_READ after " + (SystemClock.elapsedRealtime() - startedAt) + " ms");
         // Theme is also stored in WebView localStorage; the native bridge keeps
         // a copy so this screen can render before the main WebView is opened.
         configureColors();
         configureSystemBars();
         readPrompts(prefs.getString("prompts_json", "[]"));
+        Log.i(TAG, "PICKER_PROMPTS_READ count=" + allPrompts.size() + " after " + (SystemClock.elapsedRealtime() - startedAt) + " ms");
         buildScreen();
+        Log.i(TAG, "PICKER_SCREEN_BUILT after " + (SystemClock.elapsedRealtime() - startedAt) + " ms");
         renderPrompts("");
+        Log.i(TAG, "PICKER_ON_CREATE_COMPLETE after " + (SystemClock.elapsedRealtime() - startedAt) + " ms");
     }
 
-    @Override\n    protected void onResume() {\n        super.onResume();\n        Log.i(TAG, "PICKER_ON_RESUME");\n    }\n\n    private void configureColors() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "PICKER_ON_RESUME");
+    }
+
+    private void configureColors() {
         background = Color.parseColor(dark ? "#0b1120" : "#f6f7fb");
         surface = Color.parseColor(dark ? "#121c2d" : "#ffffff");
         text = Color.parseColor(dark ? "#edf2fa" : "#182230");
