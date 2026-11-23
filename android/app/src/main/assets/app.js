@@ -9,7 +9,15 @@ function loadPrompts(){
   try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); return Array.isArray(saved) ? saved : []; }
   catch { return []; }
 }
-function savePrompts(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts)); }
+function savePrompts(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
+  syncPromptsWithAndroid();
+}
+function syncPromptsWithAndroid(){
+  if(window.AndroidBridge && typeof AndroidBridge.syncPrompts==="function"){
+    try { AndroidBridge.syncPrompts(JSON.stringify(prompts)); } catch(error) { console.warn("Prompt sync failed",error); }
+  }
+}
 function escapeHTML(value=""){ return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function showToast(message){
   const toast=$("toast"); toast.textContent=message; toast.classList.add("show");
@@ -185,6 +193,7 @@ function setTheme(theme){
 }
 const savedTheme=localStorage.getItem("promptvault.theme");
 setTheme(savedTheme==="dark"?"dark":"light");
+syncPromptsWithAndroid();
 $("themeBtn").addEventListener("click",()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark"));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("searchInput").focus();}});
 if("serviceWorker" in navigator && location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
