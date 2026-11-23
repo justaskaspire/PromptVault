@@ -14,6 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 import android.widget.Toast;
+import android.widget.LinearLayout;
 import android.view.View;
 import android.graphics.Color;
 import android.os.Build;
@@ -33,23 +34,34 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         webView = new WebView(this);
-        setContentView(webView);
-        // Keep the WebView content clear of Android's status and navigation bars.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            getWindow().setDecorFitsSystemWindows(false);
-            webView.setOnApplyWindowInsetsListener((view, insets) -> {
+
+        // Match BandWatch's proven layout: apply system-bar insets to a root
+        // container, not to the WebView itself. This keeps both the top content
+        // and bottom app controls clear of Android's status/navigation bars.
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(Color.TRANSPARENT);
+
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
+            int topInset;
+            int bottomInset;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
-                view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-                return insets;
-            });
-        } else {
-            webView.setFitsSystemWindows(true);
-            webView.setOnApplyWindowInsetsListener((view, insets) -> {
-                view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                        insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
-                return insets.consumeSystemWindowInsets();
-            });
-        }
+                topInset = bars.top;
+                bottomInset = bars.bottom;
+            } else {
+                topInset = insets.getSystemWindowInsetTop();
+                bottomInset = insets.getSystemWindowInsetBottom();
+            }
+            view.setPadding(0, topInset, 0, bottomInset);
+            return insets;
+        });
+
+        root.addView(webView, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+        ));
+        setContentView(root);
         webView.setBackgroundColor(Color.TRANSPARENT);
 
         WebSettings settings = webView.getSettings();
