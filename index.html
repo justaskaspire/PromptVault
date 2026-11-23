@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Your personal library for AI prompts and instructions.">
+  <title>PromptVault — Your AI prompt library</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="PromptVault home"><span class="brand-mark">P</span><span>PromptVault</span></a>
+      <button class="primary-button new-prompt" id="newPromptBtn">＋ <span>New prompt</span></button>
+      <div class="nav-label">LIBRARY</div>
+      <nav class="nav-list" aria-label="Prompt filters">
+        <button class="nav-item active" data-filter="all"><span>▦</span> All prompts <span class="nav-count" id="allCount">0</span></button>
+        <button class="nav-item" data-filter="favorites"><span>☆</span> Favorites</button>
+      </nav>
+      <div class="nav-label category-heading">CATEGORIES</div>
+      <nav class="nav-list" id="categoryList"></nav>
+      <div class="sidebar-bottom">
+        <div class="storage-note"><span class="status-dot"></span><span>Stored on this device</span></div>
+        <button class="text-button" id="exportBtn">↥ Export backup</button>
+        <button class="text-button" id="importBtn">↧ Import backup</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="menuBtn" aria-label="Open menu">☰</button>
+        <div class="breadcrumb">Your workspace <span>/</span> <strong id="currentView">All prompts</strong></div>
+        <div class="top-actions"><span class="local-badge">PRIVATE BY DEFAULT</span></div>
+      </header>
+
+      <section class="page-intro">
+        <div>
+          <p class="eyebrow">YOUR PERSONAL AI LIBRARY</p>
+          <h1 id="pageTitle">All prompts</h1>
+          <p class="subtitle">Keep your best prompts organized, ready to copy and use.</p>
+        </div>
+        <button class="primary-button intro-new" id="newPromptBtn2">＋ New prompt</button>
+      </section>
+
+      <section class="toolbar">
+        <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Search prompts, content or tags…" autocomplete="off"></label>
+        <select id="sortSelect" class="sort-select" aria-label="Sort prompts">
+          <option value="updated">Recently updated</option>
+          <option value="created">Recently added</option>
+          <option value="az">Name A–Z</option>
+        </select>
+      </section>
+
+      <section class="stats-row">
+        <div class="stat-card"><span class="stat-icon">▤</span><div><strong id="statTotal">0</strong><small>Total prompts</small></div></div>
+        <div class="stat-card"><span class="stat-icon star-icon">☆</span><div><strong id="statFavorites">0</strong><small>Favorites</small></div></div>
+        <div class="stat-card"><span class="stat-icon">▧</span><div><strong id="statCategories">0</strong><small>Categories</small></div></div>
+      </section>
+
+      <div class="section-heading"><div><h2 id="listHeading">Your prompts</h2><span id="resultCount" class="result-count">0 items</span></div></div>
+      <section id="promptGrid" class="prompt-grid" aria-live="polite"></section>
+      <footer class="footer-note">PromptVault <span>•</span> Your prompts stay in your browser on this device.</footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header"><div><p class="eyebrow">PROMPT DETAILS</p><h2 id="modalTitle">Create a prompt</h2></div><button class="icon-button" id="closeModal" aria-label="Close">✕</button></div>
+      <form id="promptForm">
+        <input type="hidden" id="promptId">
+        <label class="field-label" for="promptTitle">Prompt name</label>
+        <input class="field-input" id="promptTitle" maxlength="80" placeholder="e.g. Research assistant" required>
+        <label class="field-label" for="promptCategory">Category</label>
+        <select class="field-input" id="promptCategory">
+          <option>AI Instructions</option><option>Writing</option><option>Coding</option><option>Research</option><option>Learning</option><option>Business</option><option>Image Generation</option><option>Other</option>
+        </select>
+        <label class="field-label" for="promptTags">Tags <span class="optional">(comma separated)</span></label>
+        <input class="field-input" id="promptTags" placeholder="e.g. ChatGPT, study, expert">
+        <label class="field-label" for="promptContent">Prompt text</label>
+        <textarea class="field-input prompt-textarea" id="promptContent" placeholder="Write or paste your prompt here…" required></textarea>
+        <div class="modal-footer"><button type="button" class="secondary-button" id="cancelModal">Cancel</button><button class="primary-button" type="submit">Save prompt</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
