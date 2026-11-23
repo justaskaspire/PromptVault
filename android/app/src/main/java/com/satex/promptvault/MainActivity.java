@@ -14,6 +14,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 import android.widget.Toast;
+import android.view.View;
+import android.graphics.Color;
+import android.os.Build;
+import android.view.WindowInsets;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +34,23 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         webView = new WebView(this);
         setContentView(webView);
+        // Keep the WebView content clear of Android's status and navigation bars.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+            webView.setOnApplyWindowInsetsListener((view, insets) -> {
+                android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+                return insets;
+            });
+        } else {
+            webView.setFitsSystemWindows(true);
+            webView.setOnApplyWindowInsetsListener((view, insets) -> {
+                view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+                return insets.consumeSystemWindowInsets();
+            });
+        }
+        webView.setBackgroundColor(Color.TRANSPARENT);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
