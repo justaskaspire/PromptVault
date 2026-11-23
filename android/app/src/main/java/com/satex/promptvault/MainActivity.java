@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileCallback;
     private String pendingBackup = "";
     private WebView webView;
+    private LinearLayout rootLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +39,11 @@ public class MainActivity extends Activity {
         // Match BandWatch's proven layout: apply system-bar insets to a root
         // container, not to the WebView itself. This keeps both the top content
         // and bottom app controls clear of Android's status/navigation bars.
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.TRANSPARENT);
+        rootLayout = new LinearLayout(this);
+        rootLayout.setOrientation(LinearLayout.VERTICAL);
+        rootLayout.setBackgroundColor(Color.WHITE);
 
-        root.setOnApplyWindowInsetsListener((view, insets) -> {
+        rootLayout.setOnApplyWindowInsetsListener((view, insets) -> {
             int topInset;
             int bottomInset;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -57,11 +58,12 @@ public class MainActivity extends Activity {
             return insets;
         });
 
-        root.addView(webView, new LinearLayout.LayoutParams(
+        rootLayout.addView(webView, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         ));
-        setContentView(root);
+        setContentView(rootLayout);
+        applyNativeTheme("light");
         webView.setBackgroundColor(Color.TRANSPARENT);
 
         WebSettings settings = webView.getSettings();
@@ -91,7 +93,35 @@ public class MainActivity extends Activity {
         webView.loadUrl("file:///android_asset/index.html");
     }
 
+    private void applyNativeTheme(String theme) {
+        boolean dark = "dark".equals(theme);
+        int background = Color.parseColor(dark ? "#0b1120" : "#f6f7fb");
+        rootLayout.setBackgroundColor(background);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            android.view.WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                int appearance = dark ? 0 : android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+                controller.setSystemBarsAppearance(
+                        appearance,
+                        android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                );
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View decor = getWindow().getDecorView();
+            int flags = decor.getSystemUiVisibility();
+            if (dark) flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            else flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            decor.setSystemUiVisibility(flags);
+        }
+    }
+
     private class AppBridge {
+        @JavascriptInterface
+        public void setTheme(String theme) {
+            runOnUiThread(() -> applyNativeTheme(theme));
+        }
+
         @JavascriptInterface
         public void copyText(String text) {
             runOnUiThread(() -> {
